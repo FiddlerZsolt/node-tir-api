@@ -10,6 +10,7 @@
 ### Stack
 
 [Moleculer](https://moleculer.services/)
+[Fastest-validator](https://github.com/icebob/fastest-validator)
 [Mongoose](https://mongoosejs.com/)
 [bcrypt](https://www.npmjs.com/package/bcrypt)
 [hat](https://www.npmjs.com/package/hat)
