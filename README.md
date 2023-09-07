@@ -49,3 +49,5 @@ The gRPC server is using IPV6 by default, but the IPV6 thing in Docker is tortur
 ```rust
     let addr = "0.0.0.0:50051".parse()?;
 ```
+
+Now go open the dev docker-compose file, and paste the OpenAI after to OPENAI_SK= value.
