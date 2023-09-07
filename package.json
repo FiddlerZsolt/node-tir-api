@@ -9,8 +9,8 @@
     "test": "jest --coverage",
     "lint": "eslint services",
     "dev": "moleculer-runner --repl --hot services/**/*.service.js --envfile ./.env.development",
-    "dc:db": "docker-compose -f config/development/docker-compose.yml up mongo redis",
-    "dc:db:linux": "docker compose -f config/development/docker-compose.yml up mongo redis",
+    "dc:db": "docker-compose -f config/development/docker-compose.yml up mongo redis tirengine",
+    "dc:db:linux": "docker compose -f config/development/docker-compose.yml up mongo redis tirengine",
     "dc:up": "docker-compose up --build -d",
     "dc:logs": "docker-compose logs -f",
     "dc:down": "docker-compose down"
