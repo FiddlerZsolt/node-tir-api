@@ -60,6 +60,16 @@ services:
     ports:
       - 6379:6379
 
+  tirengine:
+    build: 
+      context: ../../tir-engine-grpc/
+    environment:
+      - OPENAI_SK=
+    networks:
+      - internal
+    ports:
+      - 50051:50051
+
   # traefik:
   #   image: traefik:v2.4
   #   command:
@@ -77,6 +87,11 @@ services:
 
 networks:
   internal:
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: "::1/64"
+
 
 volumes:
   data:
