@@ -49,6 +49,7 @@ module.exports = {
 
 				aliases: {
 					"GET /users/me": "user.getUser",
+					"POST /tir/g": "tir.generateKnowLedge"
 				},
 
 				/**
