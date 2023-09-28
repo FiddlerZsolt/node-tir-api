@@ -15,7 +15,7 @@ module.exports = {
 	name: "tir",
 
 	settings: {
-		engineHost: "localhost:50051",
+		engineHost: "tir-engine-grpc:3001",
 		protoPath: path.join(__dirname, "/../tir-engine-grpc/proto/tir.proto"),
 		packageDefinition: protoLoader.loadSync(path.join(__dirname, "/../tir-engine-grpc/proto/tir.proto")),
 	},
@@ -32,7 +32,7 @@ module.exports = {
 
 		generateKnowLedge: {
 			async handler(ctx) {
-				return this.generateKnowLedge();
+				return this.generateKnowLedge({ title: "Design patterns", topics: [{ title: "Singleton design pattern", explanation: "" }] });
 			}
 		}
 	},
@@ -114,6 +114,7 @@ module.exports = {
 			this.settings.engineHost,
 			grpc.credentials.createInsecure()
 		);
+
 	}
 
 };
