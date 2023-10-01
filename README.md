@@ -23,31 +23,13 @@
 
 ### TIR-Engine
 
-Create a Dockerfile in the "tir-engine-grpc" folder and paste the following code:
+Checkout the following repository next to the project: [TIR-ENGINE-GRPC](https://github.com/Ptrskay3/tir-engine-grpc)
+Follow the instructions in the README.md
 
-```Dockerfile
-FROM rust:1.72 AS builder
+Create an `.env.grpc.development` file by `.env.grpc.development.example` example and place the OPENAI_SK value.
 
-WORKDIR /tir-engine
+Start the project with Docker Compose:
 
-COPY . .
-
-RUN apt-get update
-
-RUN apt-get install -y protobuf-compiler libprotobuf-dev
-
-RUN cargo install --path .
-RUN cargo build
-
-FROM builder
-
-CMD [ "cargo", "r" ]
+```bash
+    docker-compose up
 ```
-
-The gRPC server is using IPV6 by default, but the IPV6 thing in Docker is torture, go to "tir-engine-grpc/src/main.rs" and modify line 141 to this:
-
-```rust
-    let addr = "0.0.0.0:50051".parse()?;
-```
-
-Now go open the dev docker-compose file, and paste the OpenAI after to OPENAI_SK= value.
