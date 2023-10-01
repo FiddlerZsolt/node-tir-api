@@ -9,8 +9,7 @@
     "test": "jest --coverage",
     "lint": "eslint services",
     "dev": "moleculer-runner --repl --hot services/**/*.service.js --envfile ./.env.development",
-    "dc:db": "docker-compose -f config/development/docker-compose.yml up mongo redis tirengine",
-    "dc:db:linux": "docker compose -f config/development/docker-compose.yml up mongo redis tirengine",
+    "dc:db": "docker-compose -f config/development/docker-compose.yml up mongo redis tir-engine-grpc",
     "dc:up": "docker-compose up --build -d",
     "dc:logs": "docker-compose logs -f",
     "dc:down": "docker-compose down"
@@ -28,12 +27,16 @@
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.9.2",
+    "bcrypt": "^5.1.1",
     "dotenv": "^16.3.1",
+    "hat": "^0.0.3",
     "ioredis": "^5.0.0",
     "moleculer": "^0.14.26",
-    "moleculer-db": "^0.8.20",
+    "moleculer-db": "^0.8.24",
     "moleculer-db-adapter-mongo": "^0.4.15",
-    "moleculer-web": "^0.10.4"
+    "moleculer-db-adapter-mongoose": "^0.9.3",
+    "moleculer-web": "^0.10.4",
+    "mongoose": "^6.5.4"
   },
   "engines": {
     "node": ">= 16.x.x"
