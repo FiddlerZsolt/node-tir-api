@@ -1,0 +1,45 @@
+version: "3.0"
+
+services:
+
+  api:
+    build:
+      context: .
+    image: node-tir-api
+    env_file: .env.development
+    environment:
+      PORT: 3000
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: /bin/sh -c "npm install && npm run dev"
+    expose:
+      - "3000"
+    ports:
+      - "3000:3000"
+    
+  mongo:
+    image: mongo:4
+    volumes:
+      - data:/data/db
+    expose:
+      - "27017"
+    ports:
+      - "27017:27017"
+  
+  tir-engine-grpc:
+    build:
+      context: ../tir-engine-grpc
+    env_file: .env.grpc.development
+    expose:
+      - "3001"
+    ports:
+      - "3001:3001"
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  data:

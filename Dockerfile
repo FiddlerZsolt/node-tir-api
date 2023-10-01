@@ -11,4 +11,4 @@ RUN npm install --production
 
 COPY . .
 
-CMD ["npm", "start"]
+CMD ["node", "/app/node_modules/moleculer/bin/moleculer-runner.js", "services"]

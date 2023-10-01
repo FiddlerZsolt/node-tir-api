@@ -60,6 +60,14 @@ services:
     ports:
       - 6379:6379
 
+  tirengine:
+    build:
+      context: ../../tir-engine-grpc
+    environment:
+      - OPENAI_SK=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
+    network_mode: host
+    ports:
+      - 50051:50051
   # traefik:
   #   image: traefik:v2.4
   #   command:
@@ -77,6 +85,7 @@ services:
 
 networks:
   internal:
+
 
 volumes:
   data:

@@ -1,0 +1,4 @@
+[submodule "tir-engine-grpc"]
+	path = tir-engine-grpc
+	url = git@github.com:Ptrskay3/tir-engine-grpc
+	branch = main
