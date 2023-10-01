@@ -17,7 +17,9 @@ module.exports = {
 	settings: {
 		engineHost: "tir-engine-grpc:3001",
 		protoPath: path.join(__dirname, "/../tir-engine-grpc/proto/tir.proto"),
-		packageDefinition: protoLoader.loadSync(path.join(__dirname, "/../tir-engine-grpc/proto/tir.proto")),
+		packageDefinition: protoLoader.loadSync(
+			path.join(__dirname, "/../tir-engine-grpc/proto/tir.proto")
+		),
 	},
 
 	actions: {
@@ -32,9 +34,14 @@ module.exports = {
 
 		generateKnowLedge: {
 			async handler(ctx) {
-				return this.generateKnowLedge({ title: "Design patterns", topics: [{ title: "Singleton design pattern", explanation: "" }] });
-			}
-		}
+				return this.generateKnowLedge({
+					title: "Design patterns",
+					topics: [
+						{ title: "Singleton design pattern", explanation: "" },
+					],
+				});
+			},
+		},
 	},
 
 	methods: {
@@ -57,10 +64,13 @@ module.exports = {
 		 */
 		generateKnowLedge(thematic) {
 			return new Promise((resolve, reject) => {
-				this.client.GenerateKnowledge({ thematic }, (error, response) => {
-					if (error) return reject(error);
-					resolve(response);
-				});
+				this.client.GenerateKnowledge(
+					{ thematic },
+					(error, response) => {
+						if (error) return reject(error);
+						resolve(response);
+					}
+				);
 			});
 		},
 
@@ -109,12 +119,12 @@ module.exports = {
 		},
 	},
 	created() {
-		const { TirService } = grpc.loadPackageDefinition(this.settings.packageDefinition).tir;
+		const { TirService } = grpc.loadPackageDefinition(
+			this.settings.packageDefinition
+		).tir;
 		this.client = new TirService(
 			this.settings.engineHost,
 			grpc.credentials.createInsecure()
 		);
-
-	}
-
+	},
 };

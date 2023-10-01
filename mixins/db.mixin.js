@@ -1,7 +1,7 @@
 "use strict";
 
 const fs = require("fs");
-const DbService	= require("moleculer-db");
+const DbService = require("moleculer-db");
 
 /**
  * @typedef {import('moleculer').ServiceSchema} ServiceSchema Moleculer's Service Schema
@@ -9,7 +9,7 @@ const DbService	= require("moleculer-db");
  * @typedef {import('moleculer-db').MoleculerDB} MoleculerDB  Moleculer's DB Service Schema
  */
 
-module.exports = function(collection) {
+module.exports = function (collection) {
 	const cacheCleanEventName = `cache.clean.${collection}`;
 
 	/** @type {MoleculerDB & ServiceSchema} */
@@ -27,7 +27,7 @@ module.exports = function(collection) {
 				if (this.broker.cacher) {
 					await this.broker.cacher.clean(`${this.fullName}.*`);
 				}
-			}
+			},
 		},
 
 		methods: {
@@ -40,7 +40,7 @@ module.exports = function(collection) {
 			 */
 			async entityChanged(type, json, ctx) {
 				ctx.broadcast(cacheCleanEventName);
-			}
+			},
 		},
 
 		async started() {
@@ -49,12 +49,17 @@ module.exports = function(collection) {
 			if (this.seedDB) {
 				const count = await this.adapter.count();
 				if (count == 0) {
-					this.logger.info(`The '${collection}' collection is empty. Seeding the collection...`);
+					this.logger.info(
+						`The '${collection}' collection is empty. Seeding the collection...`
+					);
 					await this.seedDB();
-					this.logger.info("Seeding is done. Number of records:", await this.adapter.count());
+					this.logger.info(
+						"Seeding is done. Number of records:",
+						await this.adapter.count()
+					);
 				}
 			}
-		}
+		},
 	};
 
 	if (process.env.MONGO_URI) {
@@ -63,7 +68,7 @@ module.exports = function(collection) {
 
 		schema.adapter = new MongoAdapter(process.env.MONGO_URI);
 		schema.collection = collection;
-	} else if (process.env.NODE_ENV === 'test') {
+	} else if (process.env.NODE_ENV === "test") {
 		// NeDB memory adapter for testing
 		schema.adapter = new DbService.MemoryAdapter();
 	} else {
@@ -74,7 +79,9 @@ module.exports = function(collection) {
 			fs.mkdirSync("./data");
 		}
 
-		schema.adapter = new DbService.MemoryAdapter({ filename: `./data/${collection}.db` });
+		schema.adapter = new DbService.MemoryAdapter({
+			filename: `./data/${collection}.db`,
+		});
 	}
 
 	return schema;
