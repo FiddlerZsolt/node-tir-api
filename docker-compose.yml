@@ -29,7 +29,7 @@ services:
   
   tir-engine-grpc:
     build:
-      context: ../tir-engine-grpc
+      context: ./tir-engine-grpc
     env_file: .env.grpc.development
     expose:
       - "3001"
