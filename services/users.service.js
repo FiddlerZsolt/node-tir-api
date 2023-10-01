@@ -1,6 +1,8 @@
 "use strict";
 
 const bcrypt = require("bcrypt");
+const moment = require("moment");
+const hat = require("hat");
 const DbMixin = require("../mixins/db.mixin");
 const User = require("../models/user");
 
@@ -59,13 +61,20 @@ module.exports = {
 					this.broker.logger.info(
 						`>>>>>>>>> [${this.name}] New registration: ${email}`
 					);
-					const hashedPassword = this.generateHash(password);
+
 					const user = {
 						email: email,
-						password: hashedPassword,
+						password: this.generateHash(password),
+						apiKey: this.generateToken(),
 					};
 
-					return user;
+					const insertedUser = this.adapter.insert(user);
+
+					return this.transformDocuments(
+						ctx,
+						this.settings.fields,
+						insertedUser
+					);
 				} catch (error) {
 					console.log(error);
 					throw error;
@@ -94,6 +103,12 @@ module.exports = {
 	methods: {
 		generateHash(str) {
 			return bcrypt.hashSync(str, 10);
+		},
+		generateToken() {
+			return {
+				key: hat(),
+				expirationDate: moment().add(4, "hours").toISOString(),
+			};
 		},
 	},
 
