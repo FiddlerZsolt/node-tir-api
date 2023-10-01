@@ -19,6 +19,14 @@ module.exports = {
 		// Exposed port
 		port: process.env.PORT || 3000,
 
+		cors: {
+			origin: "*",
+			methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
+			exposedHeaders: [],
+			credentials: false,
+			maxAge: 3600,
+		},
+
 		// Exposed IP
 		ip: "0.0.0.0",
 
@@ -29,7 +37,14 @@ module.exports = {
 			{
 				path: "/api",
 
-				whitelist: ["**"],
+				whitelist: [
+					// Moleculer
+					"$node.list",
+					"$node.services",
+					"$node.actions",
+					// Users service
+					"users.create", // POST /api/users
+				],
 
 				// Route-level Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
 				use: [],
@@ -45,12 +60,9 @@ module.exports = {
 
 				// The auto-alias feature allows you to declare your route alias directly in your services.
 				// The gateway will dynamically build the full routes from service schema.
-				autoAliases: false,
+				autoAliases: true,
 
-				aliases: {
-					"GET /users/me": "user.getUser",
-					"POST /tir/g": "tir.generateKnowLedge"
-				},
+				aliases: {},
 
 				/**
 				 * Before call hook. You can check the request.
