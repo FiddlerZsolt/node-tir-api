@@ -9,7 +9,7 @@ const DbMixin = require("../mixins/db.mixin");
 
 /** @type {ServiceSchema} */
 module.exports = {
-	name: "user",
+	name: "users",
 	// version: 1
 
 	/**
@@ -32,27 +32,34 @@ module.exports = {
 		get: false,
 		find: false,
 		count: false,
-		create: false,
 		insert: false,
 		update: false,
 		remove: false,
 		list: false,
 
-		// --- ADDITIONAL ACTIONS ---
-
-		// Warning this section is just an example
-		getUser: {
+		create: {
+			rest: "POST /",
 			params: {
-				goatSays: {
+				email: {
+					type: "email",
+				},
+				password: {
 					type: "string",
 					empty: false,
+					min: 6,
 				},
 			},
 			async handler(ctx) {
-				const { goatSays } = ctx.params;
-				const user = await this.getUser(1);
-				console.log({ user });
-				return `${user.name} says: ${goatSays}`;
+				const { email, password } = ctx.params;
+				try {
+					return {
+						email,
+						password,
+					};
+				} catch (error) {
+					console.log(error);
+					throw error;
+				}
 			},
 		},
 	},
@@ -60,14 +67,7 @@ module.exports = {
 	/**
 	 * Methods
 	 */
-	methods: {
-		async getUser(id) {
-			const user = {
-				name: "sihl",
-			};
-			return user;
-		},
-	},
+	methods: {},
 
 	/**
 	 * Fired after database connection establishing.
