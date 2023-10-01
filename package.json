@@ -36,6 +36,7 @@
     "moleculer-db-adapter-mongo": "^0.4.15",
     "moleculer-db-adapter-mongoose": "^0.9.3",
     "moleculer-web": "^0.10.4",
+    "moment": "^2.29.4",
     "mongoose": "^6.5.4"
   },
   "engines": {
