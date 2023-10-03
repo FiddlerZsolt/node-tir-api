@@ -2,6 +2,7 @@
 const grpc = require("@grpc/grpc-js");
 const protoLoader = require("@grpc/proto-loader");
 const path = require("path");
+const helperMixin = require("../mixins/helper.mixin");
 
 /**
  * @typedef {import('moleculer').ServiceSchema} ServiceSchema Moleculer's Service Schema
@@ -14,23 +15,14 @@ const path = require("path");
 module.exports = {
 	name: "tir",
 
+	mixins: [helperMixin],
+
 	settings: {
 		engineHost: "tir-engine-grpc:3001",
 		protoPath: path.join(__dirname, "/../tir-engine-grpc/proto/tir.proto"),
 		packageDefinition: protoLoader.loadSync(
 			path.join(__dirname, "/../tir-engine-grpc/proto/tir.proto")
 		),
-	},
-
-	actions: {
-		get: false,
-		find: false,
-		count: false,
-		create: false,
-		insert: false,
-		update: false,
-		remove: false,
-		list: false,
 	},
 
 	methods: {
@@ -57,8 +49,7 @@ module.exports = {
 				const knowledge = await this.client.GenerateKnowledge(thematic);
 				return knowledge;
 			} catch (error) {
-				console.log(error);
-				throw error;
+				this.errorHandler(error);
 			}
 		},
 
@@ -79,8 +70,7 @@ module.exports = {
 				const evaulatedAnswer = await this.client.EvaulateAnswer(answer);
 				return evaulatedAnswer;
 			} catch (error) {
-				console.log(error);
-				throw error;
+				this.errorHandler(error);
 			}
 		},
 
@@ -102,8 +92,7 @@ module.exports = {
 				);
 				return correctExplanation;
 			} catch (error) {
-				console.log(error);
-				throw error;
+				this.errorHandler(error);
 			}
 		},
 	},
@@ -115,5 +104,7 @@ module.exports = {
 			this.settings.engineHost,
 			grpc.credentials.createInsecure()
 		);
+
+		this.logMessage("grpc client is ready");
 	},
 };
