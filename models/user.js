@@ -1,16 +1,25 @@
 const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+const { ROLES } = require("./enum");
+
+const ApiKeySchema = new mongoose.Schema({
+	key: { type: String },
+	expirationDate: { type: Date, default: null },
+});
 
 const UserSchema = new mongoose.Schema(
 	{
 		email: { type: String },
 		password: { type: String },
-		apiKey: [
-			{
-				key: { type: String },
-				expirationDate: { type: Date, default: null },
-			},
-		],
+		bio: { type: String },
+		fullName: { type: String },
+		role: {
+			type: String,
+			enum: Object.values(ROLES),
+			default: ROLES.MEMBER,
+		},
+		apiKey: {
+			type: [ApiKeySchema],
+		},
 	},
 	{ timestamps: true }
 );
