@@ -30,6 +30,16 @@ module.exports = function (collection) {
 			},
 		},
 
+		actions: {
+			find: false,
+			count: false,
+			create: false,
+			insert: false,
+			update: false,
+			remove: false,
+			list: false,
+		},
+
 		methods: {
 			/**
 			 * Send a cache clearing event when an entity changed.
