@@ -31,17 +31,6 @@ module.exports = {
 		update: false,
 		remove: false,
 		list: false,
-
-		generateKnowLedge: {
-			async handler(ctx) {
-				return this.generateKnowLedge({
-					title: "Design patterns",
-					topics: [
-						{ title: "Singleton design pattern", explanation: "" },
-					],
-				});
-			},
-		},
 	},
 
 	methods: {
@@ -62,16 +51,15 @@ module.exports = {
 		/**
 		 * @param {ThematicObject} thematic
 		 */
-		generateKnowLedge(thematic) {
-			return new Promise((resolve, reject) => {
-				this.client.GenerateKnowledge(
-					{ thematic },
-					(error, response) => {
-						if (error) return reject(error);
-						resolve(response);
-					}
-				);
-			});
+		async generateKnowledge(thematic) {
+			console.log("thematic", thematic);
+			try {
+				const knowledge = await this.client.GenerateKnowledge(thematic);
+				return knowledge;
+			} catch (error) {
+				console.log(error);
+				throw error;
+			}
 		},
 
 		/**
@@ -86,13 +74,14 @@ module.exports = {
 		 *
 		 * @param {Answer} answer
 		 */
-		evaulateAnswer(answer) {
-			return new Promise((resolve, reject) => {
-				this.client.EvaulateAnswer({ answer }, (error, response) => {
-					if (error) return reject(error);
-					resolve(response);
-				});
-			});
+		async evaulateAnswer(answer) {
+			try {
+				const evaulatedAnswer = await this.client.EvaulateAnswer(answer);
+				return evaulatedAnswer;
+			} catch (error) {
+				console.log(error);
+				throw error;
+			}
 		},
 
 		/**
@@ -106,16 +95,16 @@ module.exports = {
 		 *
 		 * @param {Explanation} explanation
 		 */
-		correctExplanation(explanation) {
-			return new this.Promise((resolve, reject) => {
-				this.client.CorrectExplanation(
-					{ explanation },
-					(error, response) => {
-						if (error) return reject(error);
-						resolve(response);
-					}
+		async correctExplanation(explanation) {
+			try {
+				const correctExplanation = await this.client.CorrectExplanation(
+					explanation
 				);
-			});
+				return correctExplanation;
+			} catch (error) {
+				console.log(error);
+				throw error;
+			}
 		},
 	},
 	created() {
