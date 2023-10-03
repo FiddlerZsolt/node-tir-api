@@ -28,8 +28,27 @@ Follow the instructions in the README.md
 
 Create an `.env.grpc.development` file by `.env.grpc.development.example` example and place the OPENAI_SK value.
 
+Clone tir-engine-grpc repo to th root folder:
+
+```bash
+    git clone https://github.com/Ptrskay3/tir-engine-grpc.git
+```
+
+```bash
+    git submodule init
+    git submodule update --remote --recursive --no-single-branch
+```
+
+```bash
+    cd tir-engine-grpc
+```
+
+```bash
+    git clone https://github.com/teamcodeyard/tir-engine.git
+```
+
 Start the project with Docker Compose:
 
 ```bash
-    docker-compose up
+    npm run dc:up
 ```
