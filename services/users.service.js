@@ -5,6 +5,7 @@ const moment = require("moment");
 const hat = require("hat");
 const DbMixin = require("../mixins/db.mixin");
 const User = require("../models/user");
+const helperMixin = require("../mixins/helper.mixin");
 
 /**
  * @typedef {import('moleculer').ServiceSchema} ServiceSchema Moleculer's Service Schema
@@ -19,7 +20,7 @@ module.exports = {
 	/**
 	 * Mixins
 	 */
-	mixins: [DbMixin("user")],
+	mixins: [DbMixin("user"), helperMixin],
 
 	model: User,
 
@@ -28,70 +29,58 @@ module.exports = {
 	 */
 	settings: {
 		// Available fields in the responses
-		fields: ["_id", "email", "password", "apiKey"],
+		fields: ["_id", "email", "password", "apiKey", "bio", "fullName", "role"],
 	},
 
 	/**
 	 * Actions
 	 */
 	actions: {
-		find: false,
-		count: false,
-		insert: false,
-		update: false,
-		remove: false,
-		list: false,
-
-		// TODO:
-		create: {
-			rest: "POST /",
+		registration: {
+			rest: "POST /", // /api/users/
 			params: {
-				email: {
-					type: "email",
+				email: "email",
+				bio: {
+					type: "string",
+					empty: false,
+					optional: true,
+				},
+				fullName: {
+					type: "string",
+					empty: false,
+					optional: true,
 				},
 				password: {
 					type: "string",
-					empty: false,
-					min: 6,
+					pattern: /^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.*[A-Z])(?=.*[a-z]).{8,}$/g,
 				},
 			},
 			async handler(ctx) {
-				const { email, password } = ctx.params;
 				try {
-					this.broker.logger.info(
-						`>>>>>>>>> [${this.name}] New registration: ${email}`
-					);
+					const { email, password, bio, fullName } = ctx.params;
 
-					const user = {
-						email: email,
+					const exists = await this.adapter.findOne({ email });
+
+					if (exists) {
+						throw new Error("USER_IS_EXISTS");
+					}
+
+					const userData = {
+						email,
+						bio,
+						fullName,
 						password: this.generateHash(password),
-						apiKey: this.generateToken(),
 					};
 
-					const insertedUser = this.adapter.insert(user);
+					const user = await this.adapter.insert(userData);
 
-					return this.transformDocuments(
-						ctx,
-						this.settings.fields,
-						insertedUser
-					);
-				} catch (error) {
-					console.log(error);
-					throw error;
-				}
-			},
-		},
+					user.apiKey.push(this.generateToken());
 
-		// TODO:
-		get: {
-			rest: "GET /:id",
-			async handler(ctx) {
-				const { id } = ctx.params;
-				try {
-					return { id };
+					await user.save();
+
+					return this.formatUser(user);
 				} catch (error) {
-					console.log(error);
-					throw error;
+					this.errorHandler(error);
 				}
 			},
 		},
@@ -108,6 +97,15 @@ module.exports = {
 			return {
 				key: hat(),
 				expirationDate: moment().add(4, "hours").toISOString(),
+			};
+		},
+		formatUser(userData) {
+			return {
+				email: userData.email,
+				bio: userData.bio || "",
+				fullName: userData.fullName || "",
+				apiKey: userData.apiKey[0].key,
+				role: userData.role,
 			};
 		},
 	},

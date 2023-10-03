@@ -43,7 +43,7 @@ module.exports = {
 					"$node.services",
 					"$node.actions",
 					// Users service
-					"users.create", // POST /api/users
+					"users.registration", // POST /api/users
 				],
 
 				// Route-level Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
