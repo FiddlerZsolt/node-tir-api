@@ -1,5 +1,8 @@
 "use strict";
 
+const bcrypt = require("bcrypt");
+const { TirError } = require("../errors/TirError");
+
 module.exports = {
 	name: "helper",
 
@@ -13,7 +16,20 @@ module.exports = {
 		errorHandler(error) {
 			console.log("\n>>>>>>>>> [ERROR]");
 			console.log(error);
-			throw error;
+
+			if (error instanceof TirError) {
+				throw error;
+			}
+
+			throw new TirError("Unhandled error", 500, "INTERNAL_SERVER_ERROR");
+		},
+
+		hashPassword(str) {
+			return bcrypt.hashSync(str, 10);
+		},
+
+		comparePassword(password, hash) {
+			return bcrypt.compareSync(password, hash);
 		},
 	},
 };

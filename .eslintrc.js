@@ -11,7 +11,7 @@ module.exports = {
 	extends: "eslint:recommended",
 	parserOptions: {
 		sourceType: "module",
-		ecmaVersion: 9,
+		ecmaVersion: 15,
 	},
 	rules: {
 		indent: ["warn", "tab", { SwitchCase: 1 }],

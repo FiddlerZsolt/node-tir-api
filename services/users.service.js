@@ -6,6 +6,8 @@ const hat = require("hat");
 const DbMixin = require("../mixins/db.mixin");
 const User = require("../models/user");
 const helperMixin = require("../mixins/helper.mixin");
+const ApiGateway = require("moleculer-web");
+const { TirError } = require("../errors/TirError");
 
 /**
  * @typedef {import('moleculer').ServiceSchema} ServiceSchema Moleculer's Service Schema
@@ -37,6 +39,7 @@ module.exports = {
 	 */
 	actions: {
 		registration: {
+			auth: false,
 			rest: "POST /", // /api/users/
 			params: {
 				email: "email",
@@ -74,9 +77,76 @@ module.exports = {
 
 					const user = await this.adapter.insert(userData);
 
-					user.apiKey.push(this.generateToken());
+					const token = this.generateToken();
+					user.apiKey.push(token);
 
 					await user.save();
+
+					return this.formatUser(user, token);
+				} catch (error) {
+					this.errorHandler(error);
+				}
+			},
+		},
+
+		authTest: {
+			rest: "GET /authTest", // /api/users/authTest/
+			async handler(ctx) {
+				return ctx.meta.user;
+			},
+		},
+
+		login: {
+			rest: "GET /login", // /api/users/authTest/
+			auth: false,
+			params: {
+				email: "email",
+				password: {
+					type: "string",
+					empty: false,
+				},
+			},
+			async handler(ctx) {
+				const { email, password } = ctx.params;
+				try {
+					const user = await this.adapter.findOne({ email });
+
+					if (!user) {
+						throw new ApiGateway.Errors.UnAuthorizedError();
+					}
+
+					const validatePassword = this.comparePassword(
+						password,
+						user.password
+					);
+
+					if (!validatePassword) {
+						throw new TirError("Invalid e-mail or password");
+					}
+
+					const token = this.generateToken();
+					user.apiKey.push(token);
+
+					await user.save();
+
+					return this.formatUser(user, token);
+				} catch (error) {
+					this.errorHandler(error);
+				}
+			},
+		},
+
+		findByAuthToken: {
+			params: {
+				token: {
+					type: "string",
+					empty: false,
+				},
+			},
+			async handler(ctx) {
+				const { token } = ctx.params;
+				try {
+					const user = await this.adapter.findOne({ "apiKey.key": token });
 
 					return this.formatUser(user);
 				} catch (error) {
@@ -99,12 +169,12 @@ module.exports = {
 				expirationDate: moment().add(4, "hours").toISOString(),
 			};
 		},
-		formatUser(userData) {
+		formatUser(userData, token = null) {
 			return {
 				email: userData.email,
 				bio: userData.bio || "",
 				fullName: userData.fullName || "",
-				apiKey: userData.apiKey[0].key,
+				apiKey: token?.key || null,
 				role: userData.role,
 			};
 		},

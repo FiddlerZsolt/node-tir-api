@@ -36,6 +36,7 @@ Clone tir-engine-grpc repo to th root folder:
 
 ```bash
     git submodule init
+    git submodule sync
     git submodule update --remote --recursive --no-single-branch
 ```
 
