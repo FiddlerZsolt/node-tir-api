@@ -1,6 +1,8 @@
 "use strict";
 
 const ApiGateway = require("moleculer-web");
+const { TirError } = require("../errors/TirError");
+const _ = require("lodash");
 
 /**
  * @typedef {import('moleculer').ServiceSchema} ServiceSchema Moleculer's Service Schema
@@ -129,6 +131,10 @@ module.exports = {
 	},
 
 	methods: {
+    reformatError(err) {
+      // Filter out the data from the error before sending it to the client
+      return _.pick(err, ["code", "type", "message", "data"]);
+  },
 		/**
 		 * Authenticate the request. It check the `Authorization` token value in the request header.
 		 * Check the token value & resolve the user by the token.
@@ -149,7 +155,7 @@ module.exports = {
 			let token = req.headers["x-access-token"];
 
 			if (!token) {
-				throw new ApiGateway.Errors.UnAuthorizedError();
+				throw new TirError("Missing x-access-token header variable", 401, "UNAUTHORIZED");
 			}
 
 			let user = await ctx.call("users.findByAuthToken", { token });

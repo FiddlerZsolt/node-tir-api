@@ -65,7 +65,7 @@ module.exports = {
 					const exists = await this.adapter.findOne({ email });
 
 					if (exists) {
-						throw new Error("USER_IS_EXISTS");
+            throw new TirError("E-mail already exists", 400, "BAD_REQUEST");
 					}
 
 					const userData = {
