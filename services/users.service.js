@@ -136,6 +136,33 @@ module.exports = {
 			},
 		},
 
+    getUserProfile: {
+      rest: "GET /me", // /api/users/me/
+      async handler(ctx) {
+        const { user } = ctx.meta;
+        
+        if (!user) {
+          throw new TirError("Missing x-access-token header variableeee", 401, "UNAUTHORIZED");
+        }
+
+        try {
+          let userById = await this.adapter.findById(user._id);
+
+          if (!userById) {
+            throw new TirError("User not found", 404, "NOT_FOUND");
+          }
+
+        } catch (error) {
+          this.errorHandler(error);
+        }
+
+        const formattedUser = this.formatUser(user);
+        delete formattedUser.apiKey;
+        
+        return formattedUser;
+      },
+    },
+
 		findByAuthToken: {
 			params: {
 				token: {
@@ -148,7 +175,7 @@ module.exports = {
 				try {
 					const user = await this.adapter.findOne({ "apiKey.key": token });
 
-					return this.formatUser(user);
+					return user;
 				} catch (error) {
 					this.errorHandler(error);
 				}

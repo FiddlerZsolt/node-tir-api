@@ -47,6 +47,7 @@ module.exports = {
 					// Users service
 					"users.registration", // POST /api/users
 					"users.login", // POST /api/users/login
+          "users.getUserProfile", // GET /api/users/me
 				],
 
 				// Route-level Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
@@ -74,11 +75,11 @@ module.exports = {
 				 * @param {IncomingRequest} req
 				 * @param {ServerResponse} res
 				 * @param {Object} data
-				 *
-				onBeforeCall(ctx, route, req, res) {
-					// Set request headers to context meta
-					ctx.meta.userAgent = req.headers["user-agent"];
-				}, */
+				 */
+				// onBeforeCall(ctx, route, req, res) {
+				// 	// Set request headers to context meta
+				// 	ctx.meta.token = req.headers["x-access-token"];
+				// }, 
 
 				/**
 				 * After call hook. You can modify the data.
@@ -134,7 +135,7 @@ module.exports = {
     reformatError(err) {
       // Filter out the data from the error before sending it to the client
       return _.pick(err, ["code", "type", "message", "data"]);
-  },
+    },
 		/**
 		 * Authenticate the request. It check the `Authorization` token value in the request header.
 		 * Check the token value & resolve the user by the token.
