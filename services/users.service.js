@@ -143,14 +143,12 @@ module.exports = {
 
         let userById;
         try {
-          const query = this.adapter.model.findById(user._id).select("email bio fullName role");
-          userById = await query.exec();
-          console.log(userById);
+          userById = await this.adapter.findById(user._id);
         } catch (error) {
           this.errorHandler(error);
         }
 
-        const formattedUser = this.formatUser(userById, null, true);
+        const formattedUser = this.formatUser(userById);
         
         return formattedUser;
       },
@@ -189,20 +187,19 @@ module.exports = {
 				expirationDate: moment().add(4, "hours").toISOString(),
 			};
 		},
-		formatUser(userData, token = null, filterApiKey = false) {
-			return {
-				email: userData.email,
-				bio: userData.bio || "",
-				fullName: userData.fullName || "",
-        //clear API key from response if filterApiKey is true
-				...(() => {
-          if (filterApiKey) return {};
-          return {
-            apiKey: token?.key || null
-          };
-        })(),
-				role: userData.role,
-			};
+    formatUser(userData, token = null) {
+      const formattedUser = {
+        email: userData.email,
+        bio: userData.bio || "",
+        fullName: userData.fullName || "",
+        role: userData.role,
+      }
+
+      if (token) {
+        formattedUser.apiKey = token?.key;
+      }
+
+      return formattedUser;
 		},
 	},
 
