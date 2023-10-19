@@ -140,24 +140,17 @@ module.exports = {
       rest: "GET /me", // /api/users/me/
       async handler(ctx) {
         const { user } = ctx.meta;
-        
-        if (!user) {
-          throw new TirError("Missing x-access-token header variableeee", 401, "UNAUTHORIZED");
-        }
 
+        let userById;
         try {
-          let userById = await this.adapter.findById(user._id);
-
-          if (!userById) {
-            throw new TirError("User not found", 404, "NOT_FOUND");
-          }
-
+          const query = this.adapter.model.findById(user._id).select("email bio fullName role");
+          userById = await query.exec();
+          console.log(userById);
         } catch (error) {
           this.errorHandler(error);
         }
 
-        const formattedUser = this.formatUser(user);
-        delete formattedUser.apiKey;
+        const formattedUser = this.formatUser(userById, null, true);
         
         return formattedUser;
       },
@@ -196,12 +189,18 @@ module.exports = {
 				expirationDate: moment().add(4, "hours").toISOString(),
 			};
 		},
-		formatUser(userData, token = null) {
+		formatUser(userData, token = null, filterApiKey = false) {
 			return {
 				email: userData.email,
 				bio: userData.bio || "",
 				fullName: userData.fullName || "",
-				apiKey: token?.key || null,
+        //clear API key from response if filterApiKey is true
+				...(() => {
+          if (filterApiKey) return {};
+          return {
+            apiKey: token?.key || null
+          };
+        })(),
 				role: userData.role,
 			};
 		},
