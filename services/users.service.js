@@ -205,6 +205,38 @@ module.exports = {
       },
     },
 
+    updateUserPassword: {
+      rest: "PUT /:id/password", // /api/users/{id}/password
+      params: {
+        id: {
+          type: "string",
+          empty: false,
+        },
+        password: {
+          type: "string",
+					pattern: /^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.*[A-Z])(?=.*[a-z]).{8,}$/g,
+        },
+      },
+      async handler(ctx) {
+        const { id, password } = ctx.params;
+
+        let userToUpdate;
+        try {
+          userToUpdate = await this.adapter.findById(id);
+
+          userToUpdate.password = this.generateHash(password);
+
+          await userToUpdate.save();
+        } catch (error) {
+          this.errorHandler(error);
+        }
+
+        const formattedUser = this.formatUser(userToUpdate);
+
+        return formattedUser;
+      },
+    },
+
 		findByAuthToken: {
 			params: {
 				token: {

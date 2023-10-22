@@ -49,6 +49,7 @@ module.exports = {
 					"users.login", // POST /api/users/login
           "users.getUserProfile", // GET /api/users/me
           "users.updateUser", // PUT /api/users/{id}
+          "users.updateUserPassword", // PUT /api/users/{id}/password
 				],
 
 				// Route-level Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
