@@ -237,6 +237,41 @@ module.exports = {
       },
     },
 
+    addRole: {
+      rest: "PUT /:id/role", // /api/users/{id}/role
+      params: {
+        id: {
+          type: "string",
+          empty: false,
+        },
+        role: {
+          type: "string",
+          empty: false,
+        },
+      },
+      async handler(ctx) {
+        const { id, role } = ctx.params;
+
+        //TODO: Check if role is valid
+        //TODO: Check if user has permission to add role
+
+        let userToUpdate;
+        try {
+          userToUpdate = await this.adapter.findById(id);
+
+          userToUpdate.role = role;
+
+          await userToUpdate.save();
+        } catch (error) {
+          this.errorHandler(error);
+        }
+
+        const formattedUser = this.formatUser(userToUpdate);
+
+        return formattedUser;
+      },
+    },
+
 		findByAuthToken: {
 			params: {
 				token: {
