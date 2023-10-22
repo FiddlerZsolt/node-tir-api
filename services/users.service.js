@@ -8,6 +8,7 @@ const User = require("../models/user");
 const helperMixin = require("../mixins/helper.mixin");
 const ApiGateway = require("moleculer-web");
 const { TirError } = require("../errors/TirError");
+const ROLES = require("../models/enum");
 
 /**
  * @typedef {import('moleculer').ServiceSchema} ServiceSchema Moleculer's Service Schema
@@ -247,13 +248,23 @@ module.exports = {
         role: {
           type: "string",
           empty: false,
+          optional: true,
         },
       },
       async handler(ctx) {
         const { id, role } = ctx.params;
+        // user is the logged user
+        const { user } = ctx.meta;
 
-        //TODO: Check if role is valid
-        //TODO: Check if user has permission to add role
+        // Check if user has permission to add role
+        if (user.role === ROLES.SUPERVISOR) {
+          throw new TirError("You don't have role to this action", 403, "FORBIDDEN");
+        }
+
+        // Check if role is valid
+        if (!role || !ROLES[role]) {
+          throw new TirError("Invalid role", 400, "BAD_REQUEST");
+        }
 
         let userToUpdate;
         try {
