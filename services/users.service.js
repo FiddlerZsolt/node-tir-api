@@ -283,6 +283,30 @@ module.exports = {
       },
     },
 
+    deleteUser: {
+      rest: "DELETE /:id", // /api/users/{id}
+      params: {
+        id: {
+          type: "string",
+          empty: false,
+        },
+      },
+      async handler(ctx) {
+        const { id } = ctx.params;
+
+        let userToDelete;
+        try {
+          userToDelete = await this.adapter.findById(id);
+
+          await userToDelete.remove();
+        } catch (error) {
+          this.errorHandler(error);
+        }
+
+        return {"success": true};
+      },
+    },
+
 		findByAuthToken: {
 			params: {
 				token: {

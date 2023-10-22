@@ -51,6 +51,7 @@ module.exports = {
           "users.updateUser", // PUT /api/users/{id}
           "users.updateUserPassword", // PUT /api/users/{id}/password
           "users.addRole", // PUT /api/users/{id}/role
+          "users.deleteUser", // DELETE /api/users/{id}
 				],
 
 				// Route-level Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
