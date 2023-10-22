@@ -154,6 +154,57 @@ module.exports = {
       },
     },
 
+    updateUser: {
+      rest: "PUT /:id", // /api/users/{id}
+      params: {
+        id: {
+          type: "string",
+          empty: false,
+        },
+        email: {
+          type: "email",
+          optional: true,
+        },
+        bio: {
+          type: "string",
+          optional: true,
+        },
+        fullName: {
+          type: "string",
+          empty: false,
+          optional: true,
+        },
+      },
+      async handler(ctx) {
+        const { id, email, bio, fullName } = ctx.params;
+
+        let userToUpdate;
+        try {
+          userToUpdate = await this.adapter.findById(id);
+
+          if (email) {
+            userToUpdate.email = email;
+          }
+
+          if (bio) {
+            userToUpdate.bio = bio;
+          }
+
+          if (fullName) {
+            userToUpdate.fullName = fullName;
+          }
+
+          await userToUpdate.save();
+        } catch (error) {
+          this.errorHandler(error);
+        }
+
+        const formattedUser = this.formatUser(userToUpdate);
+
+        return formattedUser;
+      },
+    },
+
 		findByAuthToken: {
 			params: {
 				token: {
