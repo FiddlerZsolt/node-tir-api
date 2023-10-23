@@ -137,6 +137,7 @@ module.exports = {
 		},
 
 		findByAuthToken: {
+			visibility: "protected",
 			params: {
 				token: {
 					type: "string",
