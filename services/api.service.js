@@ -47,11 +47,11 @@ module.exports = {
 					// Users service
 					"users.registration", // POST /api/users
 					"users.login", // POST /api/users/login
-          "users.getUserProfile", // GET /api/users/me
-          "users.updateUser", // PUT /api/users/{id}
-          "users.updateUserPassword", // PUT /api/users/{id}/password
-          "users.addRole", // PUT /api/users/{id}/role
-          "users.deleteUser", // DELETE /api/users/{id}
+					"users.getUserProfile", // GET /api/users/me
+					"users.updateUser", // PUT /api/users/{id}
+					"users.updateUserPassword", // PUT /api/users/{id}/password
+					"users.addRole", // PUT /api/users/{id}/role
+					"users.deleteUser", // DELETE /api/users/{id}
 				],
 
 				// Route-level Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
@@ -83,7 +83,7 @@ module.exports = {
 				// onBeforeCall(ctx, route, req, res) {
 				// 	// Set request headers to context meta
 				// 	ctx.meta.token = req.headers["x-access-token"];
-				// }, 
+				// },
 
 				/**
 				 * After call hook. You can modify the data.
@@ -136,10 +136,10 @@ module.exports = {
 	},
 
 	methods: {
-    reformatError(err) {
-      // Filter out the data from the error before sending it to the client
-      return _.pick(err, ["code", "type", "message", "data"]);
-    },
+		reformatError(err) {
+			// Filter out the data from the error before sending it to the client
+			return _.pick(err, ["code", "type", "message", "data"]);
+		},
 		/**
 		 * Authenticate the request. It check the `Authorization` token value in the request header.
 		 * Check the token value & resolve the user by the token.
@@ -160,7 +160,11 @@ module.exports = {
 			let token = req.headers["x-access-token"];
 
 			if (!token) {
-				throw new TirError("Missing x-access-token header variable", 401, "UNAUTHORIZED");
+				throw new TirError(
+					"Missing x-access-token header variable",
+					401,
+					"UNAUTHORIZED"
+				);
 			}
 
 			let user = await ctx.call("users.findByAuthToken", { token });
@@ -170,7 +174,11 @@ module.exports = {
 			}
 
 			if (req.$action.role && req.$action.role !== user.role) {
-				throw new ApiGateway.Errors.UnAuthorizedError();
+				throw new TirError(
+					"You don't have role to this action",
+					403,
+					"FORBIDDEN"
+				);
 			}
 
 			return user;

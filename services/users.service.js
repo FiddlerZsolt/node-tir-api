@@ -6,9 +6,8 @@ const hat = require("hat");
 const DbMixin = require("../mixins/db.mixin");
 const User = require("../models/user");
 const helperMixin = require("../mixins/helper.mixin");
-const ApiGateway = require("moleculer-web");
 const { TirError } = require("../errors/TirError");
-const ROLES = require("../models/enum");
+const { ROLES } = require("../models/enum");
 
 /**
  * @typedef {import('moleculer').ServiceSchema} ServiceSchema Moleculer's Service Schema
@@ -66,7 +65,7 @@ module.exports = {
 					const exists = await this.adapter.findOne({ email });
 
 					if (exists) {
-            throw new TirError("E-mail already exists", 400, "BAD_REQUEST");
+						throw new TirError("E-mail already exists", 400, "BAD_REQUEST");
 					}
 
 					const userData = {
@@ -113,7 +112,7 @@ module.exports = {
 					const user = await this.adapter.findOne({ email });
 
 					if (!user) {
-						throw new ApiGateway.Errors.UnAuthorizedError();
+						throw new TirError("Invalid e-mail or password");
 					}
 
 					const validatePassword = this.comparePassword(
@@ -137,175 +136,149 @@ module.exports = {
 			},
 		},
 
-    getUserProfile: {
-      rest: "GET /me", // /api/users/me/
-      async handler(ctx) {
-        const { user } = ctx.meta;
+		getUserProfile: {
+			rest: "GET /me", // /api/users/me/
+			async handler(ctx) {
+				const { user } = ctx.meta;
+				try {
+					const userById = await this.adapter.findById(user._id);
+					return this.formatUser(userById);
+				} catch (error) {
+					this.errorHandler(error);
+				}
+			},
+		},
 
-        let userById;
-        try {
-          userById = await this.adapter.findById(user._id);
-        } catch (error) {
-          this.errorHandler(error);
-        }
+		updateUser: {
+			rest: "PUT /:id", // /api/users/{id}
+			params: {
+				id: {
+					type: "string",
+					empty: false,
+				},
+				email: {
+					type: "email",
+					optional: true,
+				},
+				bio: {
+					type: "string",
+					optional: true,
+				},
+				fullName: {
+					type: "string",
+					empty: false,
+					optional: true,
+				},
+			},
+			async handler(ctx) {
+				const { id, email, bio, fullName } = ctx.params;
+				try {
+					const userToUpdate = await this.adapter.findById(id);
 
-        const formattedUser = this.formatUser(userById);
-        
-        return formattedUser;
-      },
-    },
+					if (email) {
+						userToUpdate.email = email;
+					}
 
-    updateUser: {
-      rest: "PUT /:id", // /api/users/{id}
-      params: {
-        id: {
-          type: "string",
-          empty: false,
-        },
-        email: {
-          type: "email",
-          optional: true,
-        },
-        bio: {
-          type: "string",
-          optional: true,
-        },
-        fullName: {
-          type: "string",
-          empty: false,
-          optional: true,
-        },
-      },
-      async handler(ctx) {
-        const { id, email, bio, fullName } = ctx.params;
+					if (bio) {
+						userToUpdate.bio = bio;
+					}
 
-        let userToUpdate;
-        try {
-          userToUpdate = await this.adapter.findById(id);
+					if (fullName) {
+						userToUpdate.fullName = fullName;
+					}
 
-          if (email) {
-            userToUpdate.email = email;
-          }
+					await userToUpdate.save();
 
-          if (bio) {
-            userToUpdate.bio = bio;
-          }
+					return this.formatUser(userToUpdate);
+				} catch (error) {
+					this.errorHandler(error);
+				}
+			},
+		},
 
-          if (fullName) {
-            userToUpdate.fullName = fullName;
-          }
-
-          await userToUpdate.save();
-        } catch (error) {
-          this.errorHandler(error);
-        }
-
-        const formattedUser = this.formatUser(userToUpdate);
-
-        return formattedUser;
-      },
-    },
-
-    updateUserPassword: {
-      rest: "PUT /:id/password", // /api/users/{id}/password
-      params: {
-        id: {
-          type: "string",
-          empty: false,
-        },
-        password: {
-          type: "string",
+		updateUserPassword: {
+			rest: "PUT /:id/password", // /api/users/{id}/password
+			params: {
+				id: {
+					type: "string",
+					empty: false,
+				},
+				password: {
+					type: "string",
 					pattern: /^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.*[A-Z])(?=.*[a-z]).{8,}$/g,
-        },
-      },
-      async handler(ctx) {
-        const { id, password } = ctx.params;
+					message:
+						"The password must inculde lower and uppercase letters, number and symbols",
+				},
+			},
+			async handler(ctx) {
+				const { id, password } = ctx.params;
+				try {
+					const userToUpdate = await this.adapter.findById(id);
 
-        let userToUpdate;
-        try {
-          userToUpdate = await this.adapter.findById(id);
+					userToUpdate.password = this.generateHash(password);
 
-          userToUpdate.password = this.generateHash(password);
+					await userToUpdate.save();
+					return this.formatUser(userToUpdate);
+				} catch (error) {
+					this.errorHandler(error);
+				}
+			},
+		},
 
-          await userToUpdate.save();
-        } catch (error) {
-          this.errorHandler(error);
-        }
+		addRole: {
+			role: ROLES.SUPERVISOR,
+			rest: "PUT /:id/role", // /api/users/{id}/role
+			params: {
+				id: {
+					type: "string",
+					empty: false,
+				},
+				role: {
+					type: "string",
+					empty: false,
+					optional: true,
+				},
+			},
+			async handler(ctx) {
+				const { id, role } = ctx.params;
 
-        const formattedUser = this.formatUser(userToUpdate);
+				// Check if role is valid
+				if (!role || !ROLES[role]) {
+					throw new TirError("Invalid role", 400, "BAD_REQUEST");
+				}
 
-        return formattedUser;
-      },
-    },
+				try {
+					const userToUpdate = await this.adapter.findById(id);
 
-    addRole: {
-      rest: "PUT /:id/role", // /api/users/{id}/role
-      params: {
-        id: {
-          type: "string",
-          empty: false,
-        },
-        role: {
-          type: "string",
-          empty: false,
-          optional: true,
-        },
-      },
-      async handler(ctx) {
-        const { id, role } = ctx.params;
-        // user is the logged user
-        const { user } = ctx.meta;
+					userToUpdate.role = role;
 
-        // Check if user has permission to add role
-        if (user.role === ROLES.SUPERVISOR) {
-          throw new TirError("You don't have role to this action", 403, "FORBIDDEN");
-        }
+					await userToUpdate.save();
+					return this.formatUser(userToUpdate);
+				} catch (error) {
+					this.errorHandler(error);
+				}
+			},
+		},
 
-        // Check if role is valid
-        if (!role || !ROLES[role]) {
-          throw new TirError("Invalid role", 400, "BAD_REQUEST");
-        }
+		deleteUser: {
+			rest: "DELETE /:id", // /api/users/{id}
+			params: {
+				id: {
+					type: "string",
+					empty: false,
+				},
+			},
+			async handler(ctx) {
+				const { id } = ctx.params;
+				try {
+					const userToDelete = await this.adapter.removeById(id);
 
-        let userToUpdate;
-        try {
-          userToUpdate = await this.adapter.findById(id);
-
-          userToUpdate.role = role;
-
-          await userToUpdate.save();
-        } catch (error) {
-          this.errorHandler(error);
-        }
-
-        const formattedUser = this.formatUser(userToUpdate);
-
-        return formattedUser;
-      },
-    },
-
-    deleteUser: {
-      rest: "DELETE /:id", // /api/users/{id}
-      params: {
-        id: {
-          type: "string",
-          empty: false,
-        },
-      },
-      async handler(ctx) {
-        const { id } = ctx.params;
-
-        let userToDelete;
-        try {
-          userToDelete = await this.adapter.findById(id);
-
-          await userToDelete.remove();
-        } catch (error) {
-          this.errorHandler(error);
-        }
-
-        return {"success": true};
-      },
-    },
+					return { success: !!userToDelete };
+				} catch (error) {
+					this.errorHandler(error);
+				}
+			},
+		},
 
 		findByAuthToken: {
 			params: {
@@ -340,19 +313,19 @@ module.exports = {
 				expirationDate: moment().add(4, "hours").toISOString(),
 			};
 		},
-    formatUser(userData, token = null) {
-      const formattedUser = {
-        email: userData.email,
-        bio: userData.bio || "",
-        fullName: userData.fullName || "",
-        role: userData.role,
-      }
+		formatUser(userData, token = null) {
+			const formattedUser = {
+				email: userData.email,
+				bio: userData.bio || "",
+				fullName: userData.fullName || "",
+				role: userData.role,
+			};
 
-      if (token) {
-        formattedUser.apiKey = token?.key;
-      }
+			if (token) {
+				formattedUser.apiKey = token?.key;
+			}
 
-      return formattedUser;
+			return formattedUser;
 		},
 	},
 

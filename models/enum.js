@@ -1,6 +1,6 @@
 const ROLES = {
 	MEMBER: "MEMBER",
-  SUPERVISOR: "SUPERVISOR",
+	SUPERVISOR: "SUPERVISOR",
 };
 
 module.exports = {
