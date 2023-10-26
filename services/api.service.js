@@ -116,6 +116,13 @@ module.exports = {
 
 				// Enable/disable logging
 				logging: true,
+
+				onError(req, res, err) {
+					res.setHeader("Content-Type", "application/json; charset=utf-8");
+					res.writeHead(err?.code ? err.code : 500);
+					//we can format the error here
+					res.end(JSON.stringify(err));
+				},
 			},
 		],
 
